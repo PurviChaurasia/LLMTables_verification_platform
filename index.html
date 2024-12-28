@@ -247,7 +247,7 @@
 
                 $('#question-container').html(` 
                     <p><strong>Question:</strong> ${questionData.question}</p>
-                    <p><strong>Answer:</strong> ${questionData.answer}</p>
+                    <p><strong>Answer:</strong> ${typeof questionData.answer === 'object' ? JSON.stringify(questionData.answer, null, 2) : questionData.answer}</p>
                     <p><strong>Common Entity:</strong> ${questionData.common_entity}</p>
                     <p><strong>Common Column:</strong> ${questionData.common_column}</p>
 
