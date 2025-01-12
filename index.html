@@ -246,10 +246,9 @@
                 const questionData = jsonData.questions[currentQuestionIndex];
 
                 $('#question-container').html(` 
-                    <p><strong>Question:</strong> ${questionData.question}</p>
-                    <p><strong>Answer:</strong> ${typeof questionData.answer === 'object' ? JSON.stringify(questionData.answer, null, 2) : questionData.answer}</p>
-                    <p><strong>Common Entity:</strong> ${questionData.common_entity}</p>
-                    <p><strong>Common Column:</strong> ${questionData.common_column}</p>
+                    <p><strong>Question:</strong> ${questionData.Q}</p>
+                    <p><strong>Answer:</strong> ${typeof questionData.A === 'object' ? JSON.stringify(questionData.A, null, 2) : questionData.A}</p>
+                    <p><strong>Row ID:</strong> ${questionData.game_id}</p>
 
                     <label>Difficulty Level: 
                         <select id="difficulty">
