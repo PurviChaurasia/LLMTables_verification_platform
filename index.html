@@ -19,70 +19,70 @@
 
     <style>
         body {
-            background-color: #f4f4f9; /* Minimal background color */
+            background-color: #f4f4f9;
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
-
+    
         .container {
             padding: 20px;
+            width: 100%;
         }
-
+    
         h2 {
             text-align: center;
         }
-
+    
         table.dataTable {
-            table-layout: fixed;
-            width: 100%;
+            width: 100vw;
+            max-width: 100%;
             border-collapse: collapse;
         }
-
+    
+        table.dataTable th, 
         table.dataTable td {
+            padding: 10px;
+            text-align: left;
+            min-width: 100px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        table.dataTable th, table.dataTable td {
-            padding: 8px;
-            text-align: left;
-        }
-
+    
         .expanded-summary {
             padding: 10px;
             background-color: #f9f9f9;
             white-space: normal;
             word-wrap: break-word;
-            max-width: 100%;
+            width: 100%;
             overflow: hidden;
         }
-
+    
+        table.dataTable th:hover {
+            background-color: #e0e0e0;
+            cursor: pointer;
+        }
+    
         .filters th {
-            width: 150px;
+            width: auto;
         }
-
-        table.dataTable th, table.dataTable td {
-            min-width: 150px;
-        }
-
+    
         tr.shown td.details-control {
             background: url('https://datatables.net/examples/resources/details_close.png') no-repeat center center;
         }
-
+    
         td.details-control {
-            background: none; /* Remove the background for the expand button */
+            background: none;
             text-align: center;
         }
-
-        /* Ensures row expansion is properly aligned */
+    
         .shown-row td {
-            padding-left: 40px; /* Indentation for the expanded row */
+            padding-left: 40px;
         }
-
+    
         button {
-            background: linear-gradient(45deg, #007BFF, #0056D2); /* Blue gradient button */
+            background: linear-gradient(45deg, #007BFF, #0056D2);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -90,15 +90,26 @@
             cursor: pointer;
             margin: 5px;
         }
-
+    
         button:hover {
             opacity: 0.9;
         }
-
+    
         #json-upload {
             margin: 5px;
         }
+
+        /* Collapse only the AbstractNarration column */
+        table.dataTable td:nth-child(10),
+        table.dataTable th:nth-child(10) {
+            max-width: 200px;  /* Adjust width as needed */
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
     </style>
+    
 </head>
 <body>
 
@@ -195,9 +206,12 @@
                     $('#example').DataTable().clear().destroy();
                 }
 
+
                 const table = $('#example').DataTable({
                     order: [[1, 'asc']],
-                    columnDefs: [{ targets: 0, orderable: false }],
+                    columnDefs: [
+                { targets: 9, width: '200px', className: 'text-truncate' } // AbstractNarration column (10th column)
+                ],
                     initComplete: function () {
                         this.api().columns().every(function () {
                             const column = this;
@@ -223,21 +237,26 @@
                     }
                 });
 
-                $('#example tbody').on('click', 'tr', function () {
-                    const tr = $(this);
-                    const row = $('#example').DataTable().row(tr);
-                    const rowData = row.data();
+                $('#example tbody').on('click', 'td', function () {
+                let table = $('#example').DataTable();
+                let cell = table.cell(this); // Get the clicked cell
+                let row = table.row($(this).closest('tr')); // Get the row object
+                let rowData = row.data(); // Get row data
+                let columnIndex = cell.index().column; // Get the column index
 
+                if (columnIndex === 9) {  // AbstractNarration column (10th column)
                     if (row.child.isShown()) {
                         row.child.hide();
-                        tr.removeClass('shown-row');
+                        $(this).closest('tr').removeClass('shown-row');
                     } else {
-                        const summary = rowData[11] || 'No summary available.';
-                        const content = `<div class="expanded-summary">${summary}</div>`;
+                        let narrationContent = rowData[9] || 'No summary available.'; // Ensure index is correct
+                        let content = `<div class="expanded-summary">${narrationContent}</div>`;
                         row.child(content).show();
-                        tr.addClass('shown-row');
+                        $(this).closest('tr').addClass('shown-row');
                     }
-                });
+                }
+            });
+
             }
 
             function renderQuestionAndAnswer() {
@@ -245,10 +264,13 @@
 
                 const questionData = jsonData.questions[currentQuestionIndex];
 
+                console.log(jsonData.questions.length);
+                console.log(currentQuestionIndex);
+
                 $('#question-container').html(` 
                     <p><strong>Question:</strong> ${questionData.Q}</p>
                     <p><strong>Answer:</strong> ${typeof questionData.A === 'object' ? JSON.stringify(questionData.A, null, 2) : questionData.A}</p>
-                    <p><strong>Row ID:</strong> ${questionData.game_id}</p>
+                    <p><strong>Row ID:</strong> ${questionData.award_id}</p>
 
                     <label>Difficulty Level: 
                         <select id="difficulty">
@@ -277,6 +299,7 @@
             }
 
             $('#next-btn').on('click', function () {
+
                 if (!jsonData) return;
 
                 // Reset form inputs
@@ -285,8 +308,13 @@
                 $('#correctAnswer').val('');
 
                 // Move to the next question
-                currentQuestionIndex = (currentQuestionIndex + 1) % jsonData.questions.length;
+                currentQuestionIndex = (currentQuestionIndex + 1);
+                if (currentQuestionIndex == 3){
+                    alert("Completed!")
+                    return;
+                }
                 renderQuestionAndAnswer();
+
             });
 
 
